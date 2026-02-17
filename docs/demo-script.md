@@ -3,7 +3,7 @@
 ## 1. Install (≈30 s)
 
 - In HighLevel Marketplace (sandbox), install the MCP Registry app into a sub-account.
-- Or open the **Installation URL** (e.g. `https://your-app.vercel.app/api/auth/ghl/authorize`) and complete OAuth.
+- Or open the **Installation URL** (e.g. `https://your-app.vercel.app/api/auth/ap/authorize`) and complete OAuth.
 
 ## 2. Open Custom Page (≈15 s)
 

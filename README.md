@@ -53,7 +53,7 @@ cp .env.example .env
 | `SMITHERY_API_KEY` | Smithery API key (server-only). |
 | `GHL_CLIENT_ID` | HighLevel OAuth client ID. |
 | `GHL_CLIENT_SECRET` | HighLevel OAuth client secret. |
-| `GHL_OAUTH_REDIRECT_URI` | OAuth callback URL (e.g. `https://your-app.vercel.app/api/auth/ghl/callback`). |
+| `GHL_OAUTH_REDIRECT_URI` | OAuth callback URL (e.g. `https://your-app.vercel.app/api/auth/ap/callback`). |
 | `GHL_SCOPES` | Optional; e.g. `locations.readonly`. |
 | `NEXT_PUBLIC_APP_URL` | Public app URL (e.g. `https://your-app.vercel.app`) for redirects. |
 
@@ -64,7 +64,7 @@ npm run dev
 ```
 
 - App: http://localhost:3000  
-- Connect: http://localhost:3000/api/auth/ghl/authorize  
+- Connect: http://localhost:3000/api/auth/ap/authorize  
 - Custom Page (after auth): http://localhost:3000/custom-page  
 
 ### Tests
@@ -79,7 +79,7 @@ Unit tests cover Smithery client, GHL client, and error helpers. Integration tes
 
 1. Push to GitHub and import the project in Vercel.
 2. Set the env vars above in the Vercel project.
-3. Set **Installation URL** in HighLevel app config to: `https://your-domain.com/api/auth/ghl/authorize`.
+3. Set **Installation URL** in HighLevel app config to: `https://your-domain.com/api/auth/ap/authorize`.
 4. Set **Custom Page URL** to: `https://your-domain.com/custom-page`.
 
 ## Governance and reliability

@@ -181,7 +181,7 @@ export default function CustomPage() {
 
       {showConnect && (
         <p style={styles.alert}>
-          <a href="/api/auth/ghl/authorize" style={styles.link}>
+          <a href="/api/auth/ap/authorize" style={styles.link}>
             Connect to HighLevel
           </a>{" "}
           to use this app.

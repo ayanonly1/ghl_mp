@@ -35,7 +35,7 @@
 
 ## 5. Auth and errors
 
-- **Not logged in:** Custom Page shows “Connect to HighLevel” with link to `/api/auth/ghl/authorize`.
+- **Not logged in:** Custom Page shows “Connect to HighLevel” with link to `/api/auth/ap/authorize`.
 - **Auth failure:** Show `?error=...` message (e.g. “Authentication failed”).
 - **API errors:** Per-call messages (e.g. “Failed to load agents”, “Failed to attach MCP”) with optional retry.
 
