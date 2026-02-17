@@ -1,0 +1,185 @@
+/**
+ * HighLevel API client for OAuth and Voice AI.
+ * All tokens and secrets stay server-side.
+ */
+
+const GHL_API_BASE = "https://services.leadconnectorhq.com";
+
+function getEnv() {
+  const clientId = process.env.GHL_CLIENT_ID;
+  const clientSecret = process.env.GHL_CLIENT_SECRET;
+  if (!clientId || !clientSecret) throw new Error("GHL_CLIENT_ID and GHL_CLIENT_SECRET must be set");
+  return { clientId, clientSecret };
+}
+
+export interface OAuthTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  token_type: string;
+  userType?: string;
+  locationId?: string;
+  companyId?: string;
+  [key: string]: unknown;
+}
+
+export async function exchangeCodeForTokens(
+  code: string,
+  redirectUri: string,
+  userType: "Location" | "Company" = "Location"
+): Promise<OAuthTokenResponse> {
+  const { clientId, clientSecret } = getEnv();
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: redirectUri,
+    user_type: userType,
+  });
+  const res = await fetch(`${GHL_API_BASE}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+    body: body.toString(),
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  return res.json();
+}
+
+export async function getInstalledLocations(companyToken: string): Promise<{ locationId: string }[]> {
+  const res = await fetch(`${GHL_API_BASE}/oauth/installedLocations`, {
+    headers: { Authorization: `Bearer ${companyToken}`, Version: "2021-07-28" },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  const data = await res.json();
+  const locations = data.locations ?? data;
+  return Array.isArray(locations) ? locations : [];
+}
+
+export async function getLocationToken(
+  companyToken: string,
+  locationId: string,
+  companyId: string
+): Promise<OAuthTokenResponse> {
+  const body = new URLSearchParams({
+    companyId,
+    locationId,
+  });
+  const res = await fetch(`${GHL_API_BASE}/oauth/locationToken`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      Version: "2021-07-28",
+      Authorization: `Bearer ${companyToken}`,
+    },
+    body: body.toString(),
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  const data = await res.json();
+  return data as OAuthTokenResponse;
+}
+
+export interface VoiceAIAgent {
+  id: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+export async function listAgents(locationToken: string, locationId: string): Promise<VoiceAIAgent[]> {
+  const res = await fetch(`${GHL_API_BASE}/voice-ai/agents?locationId=${encodeURIComponent(locationId)}`, {
+    headers: {
+      Authorization: `Bearer ${locationToken}`,
+      "Content-Type": "application/json",
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  const data = await res.json();
+  const agents = data.agents ?? data;
+  return Array.isArray(agents) ? agents : [];
+}
+
+export async function getAgent(
+  locationToken: string,
+  locationId: string,
+  agentId: string
+): Promise<VoiceAIAgent> {
+  const res = await fetch(
+    `${GHL_API_BASE}/voice-ai/agents/${encodeURIComponent(agentId)}?locationId=${encodeURIComponent(locationId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${locationToken}`,
+        "Content-Type": "application/json",
+      },
+      signal: AbortSignal.timeout(10000),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  return res.json();
+}
+
+export async function patchAgent(
+  locationToken: string,
+  locationId: string,
+  agentId: string,
+  patch: { mcpServers?: Record<string, { url: string; headers?: Record<string, string> }> }
+): Promise<VoiceAIAgent> {
+  const res = await fetch(
+    `${GHL_API_BASE}/voice-ai/agents/${encodeURIComponent(agentId)}?locationId=${encodeURIComponent(locationId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${locationToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patch),
+      signal: AbortSignal.timeout(10000),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new GhlApiError(res.status, text || res.statusText);
+  }
+
+  return res.json();
+}
+
+export class GhlApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string
+  ) {
+    super(message);
+    this.name = "GhlApiError";
+  }
+}
