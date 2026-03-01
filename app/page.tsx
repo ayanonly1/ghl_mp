@@ -6,7 +6,7 @@ export default function Home() {
       <div className="hero">
         <h1 className="hero-title">MCP Registry Marketplace</h1>
         <p className="hero-subtitle">
-          Connect your HighLevel Voice AI agents to MCP servers from the Smithery registry—browse, attach, and manage in one place.
+          Connect your Voice AI agents to MCP servers from the Smithery registry—browse, attach, and manage in one place.
         </p>
       </div>
 
@@ -14,10 +14,10 @@ export default function Home() {
         <div className="card card-feature">
           <h2 className="card-feature-title">Get started</h2>
           <p className="muted" style={{ margin: "0 0 1rem 0" }}>
-            Connect your HighLevel account to open the app and manage MCP attachments for your Voice AI agents.
+            Connect your account to open the app and manage MCP attachments for your Voice AI agents.
           </p>
           <Link href="/api/auth/ap/authorize" className="btn btn-primary">
-            Connect to HighLevel
+            Connect Account
           </Link>
         </div>
         <div className="card card-feature">

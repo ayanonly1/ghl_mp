@@ -179,7 +179,7 @@ export default function CustomPage() {
     <main className="page-container">
       {showConnect && (
         <div className="alert alert-warning">
-          <a href="/api/auth/ap/authorize">Connect to HighLevel</a> to use this app.
+          <a href="/api/auth/ap/authorize">Connect your account</a> to use this app.
         </div>
       )}
 
