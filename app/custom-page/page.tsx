@@ -176,30 +176,25 @@ export default function CustomPage() {
   const showConnect = attachments.length === 0 && !loadingAttachments && error?.toLowerCase().includes("unauthorized");
 
   return (
-    <main style={styles.main}>
-      <h1 style={styles.h1}>MCP Registry</h1>
-
+    <main className="page-container">
       {showConnect && (
-        <p style={styles.alert}>
-          <a href="/api/auth/ap/authorize" style={styles.link}>
-            Connect to HighLevel
-          </a>{" "}
-          to use this app.
-        </p>
+        <div className="alert alert-warning">
+          <a href="/api/auth/ap/authorize">Connect to HighLevel</a> to use this app.
+        </div>
       )}
 
       {error && !showConnect && (
-        <div style={styles.error}>
-          {error}
-          <button type="button" onClick={() => setError(null)} style={styles.dismiss}>
+        <div className="alert alert-error">
+          <span>{error}</span>
+          <button type="button" className="btn btn-ghost btn-sm alert-dismiss" onClick={() => setError(null)}>
             Dismiss
           </button>
         </div>
       )}
       {attachSuccess && (
-        <div style={styles.success}>
-          {attachSuccess}
-          <button type="button" onClick={() => setAttachSuccess(null)} style={styles.dismiss}>
+        <div className="alert alert-success">
+          <span>{attachSuccess}</span>
+          <button type="button" className="btn btn-ghost btn-sm alert-dismiss" onClick={() => setAttachSuccess(null)}>
             Dismiss
           </button>
         </div>
@@ -207,93 +202,97 @@ export default function CustomPage() {
 
       {!showConnect && (
         <>
-          <section style={styles.section}>
-            <h2 style={styles.h2}>Current MCP attachments</h2>
+          <section className="section">
+            <h2 className="section-title">Current MCP attachments</h2>
             {loadingAttachments ? (
-              <p>Loading…</p>
+              <p className="muted">Loading…</p>
             ) : attachments.length === 0 ? (
-              <p style={styles.muted}>No agents or no MCPs attached yet.</p>
+              <p className="muted">No agents or no MCPs attached yet.</p>
             ) : (
-              <table style={styles.table}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Agent</th>
-                    <th style={styles.th}>Attached MCP</th>
-                    <th style={styles.th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {attachments.map((a) => (
-                    <tr key={a.agentId}>
-                      <td style={styles.td}>{a.agentName ?? a.agentId}</td>
-                      <td style={styles.td}>{a.mcpName ?? a.mcpKey ?? "None"}</td>
-                      <td style={styles.td}>
-                        <button
-                          type="button"
-                          style={styles.btnSmall}
-                          onClick={() => { setChangeAgentId(a.agentId); setStep("list"); setSelectedMcp(null); }}
-                          disabled={!!attachLoading}
-                        >
-                          Change
-                        </button>
-                        {" "}
-                        <button
-                          type="button"
-                          style={{ ...styles.btnSmall, ...styles.btnDanger }}
-                          onClick={() => handleDetach(a.agentId)}
-                          disabled={!!attachLoading}
-                        >
-                          {attachLoading === a.agentId ? "…" : "Detach"}
-                        </button>
-                      </td>
+              <div className="table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Agent</th>
+                      <th>Attached MCP</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {attachments.map((a) => (
+                      <tr key={a.agentId}>
+                        <td>{a.agentName ?? a.agentId}</td>
+                        <td>{a.mcpName ?? a.mcpKey ?? "None"}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => { setChangeAgentId(a.agentId); setStep("list"); setSelectedMcp(null); }}
+                            disabled={!!attachLoading}
+                          >
+                            Change
+                          </button>
+                          {" "}
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDetach(a.agentId)}
+                            disabled={!!attachLoading}
+                          >
+                            {attachLoading === a.agentId ? "…" : "Detach"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </section>
 
-          <section style={styles.section}>
+          <section className="section">
             {step === "list" && (
               <>
                 {changeAgentId && (
-                  <p style={styles.alert}>
-                    Select an MCP below to attach to this agent (replacing current).{" "}
-                    <button type="button" style={styles.dismiss} onClick={() => setChangeAgentId(null)}>
+                  <div className="alert alert-warning" style={{ marginBottom: "1rem" }}>
+                    <span>Select an MCP below to attach to this agent (replacing current).</span>
+                    <button type="button" className="btn btn-ghost btn-sm alert-dismiss" onClick={() => setChangeAgentId(null)}>
                       Cancel
                     </button>
-                  </p>
+                  </div>
                 )}
-                <h2 style={styles.h2}>Browse MCPs</h2>
-                <div style={styles.toolbar}>
+                <h2 className="section-title">Browse MCPs</h2>
+                <div className="toolbar">
                   <input
                     type="search"
+                    className="input"
                     placeholder="Search MCPs…"
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                    style={styles.input}
                   />
-                  <button type="button" onClick={() => loadMcps()} style={styles.btn}>
+                  <button type="button" className="btn btn-primary" onClick={() => loadMcps()}>
                     Search
                   </button>
                 </div>
                 {loadingMcps ? (
-                  <p>Loading MCPs…</p>
+                  <p className="muted">Loading MCPs…</p>
                 ) : mcps && mcps.servers.length > 0 ? (
                   <>
-                    <ul style={styles.list}>
+                    <ul className="mcp-list">
                       {mcps.servers.map((mcp) => (
-                        <li key={mcp.qualifiedName} style={styles.card}>
+                        <li key={mcp.qualifiedName} className="mcp-card card">
                           <div>
                             <strong>{mcp.displayName ?? mcp.qualifiedName}</strong>
-                            {mcp.verified && <span style={styles.badge}>Verified</span>}
+                            {mcp.verified && <span className="badge">Verified</span>}
                           </div>
                           {mcp.description && (
-                            <p style={styles.desc}>{mcp.description.slice(0, 120)}{mcp.description.length > 120 ? "…" : ""}</p>
+                            <p className="mcp-card-desc">
+                              {mcp.description.slice(0, 120)}{mcp.description.length > 120 ? "…" : ""}
+                            </p>
                           )}
                           <button
                             type="button"
-                            style={styles.btn}
+                            className="btn btn-primary"
                             onClick={() => handleSelectMcp(mcp)}
                           >
                             Attach to agent
@@ -301,52 +300,52 @@ export default function CustomPage() {
                         </li>
                       ))}
                     </ul>
-                    <div style={styles.pagination}>
+                    <div className="pagination">
                       <button
                         type="button"
+                        className="btn btn-secondary"
                         disabled={page <= 1}
                         onClick={() => setPage((p) => p - 1)}
-                        style={styles.btn}
                       >
                         Previous
                       </button>
-                      <span style={styles.pageInfo}>
+                      <span className="page-info">
                         Page {mcps.pagination.currentPage} of {mcps.pagination.totalPages} ({mcps.pagination.totalCount} total)
                       </span>
                       <button
                         type="button"
+                        className="btn btn-secondary"
                         disabled={page >= mcps.pagination.totalPages}
                         onClick={() => setPage((p) => p + 1)}
-                        style={styles.btn}
                       >
                         Next
                       </button>
                     </div>
                   </>
                 ) : (
-                  <p style={styles.muted}>No MCPs found.</p>
+                  <p className="muted">No MCPs found.</p>
                 )}
               </>
             )}
 
             {step === "choose-agent" && selectedMcp && (
               <>
-                <h2 style={styles.h2}>Choose Voice AI Agent</h2>
-                <p style={styles.muted}>
+                <h2 className="section-title">Choose Voice AI Agent</h2>
+                <p className="muted" style={{ marginBottom: "1rem" }}>
                   Attach &quot;{selectedMcp.displayName ?? selectedMcp.qualifiedName}&quot; to:
                 </p>
                 {loadingAgents ? (
-                  <p>Loading agents…</p>
+                  <p className="muted">Loading agents…</p>
                 ) : agents.length === 0 ? (
-                  <p style={styles.muted}>No agents in this location.</p>
+                  <p className="muted">No agents in this location.</p>
                 ) : (
-                  <ul style={styles.list}>
+                  <ul className="mcp-list">
                     {agents.map((agent) => (
-                      <li key={agent.id} style={styles.card}>
+                      <li key={agent.id} className="mcp-card card">
                         <span>{agent.name ?? agent.id}</span>
                         <button
                           type="button"
-                          style={styles.btn}
+                          className="btn btn-primary"
                           onClick={() => selectedMcp && handleAttach(agent.id, selectedMcp)}
                           disabled={attachLoading !== null || !selectedMcp}
                         >
@@ -358,7 +357,8 @@ export default function CustomPage() {
                 )}
                 <button
                   type="button"
-                  style={styles.btnSecondary}
+                  className="btn btn-secondary"
+                  style={{ marginTop: "1rem" }}
                   onClick={() => { setStep("list"); setSelectedMcp(null); }}
                 >
                   Back to MCP list
@@ -371,31 +371,3 @@ export default function CustomPage() {
     </main>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  main: { padding: "1.5rem", fontFamily: "system-ui, sans-serif", maxWidth: 900, margin: "0 auto" },
-  h1: { fontSize: "1.5rem", marginBottom: "1rem" },
-  h2: { fontSize: "1.2rem", marginBottom: "0.75rem" },
-  alert: { padding: "1rem", background: "#fef3c7", borderRadius: 6 },
-  link: { color: "#b45309", fontWeight: 600 },
-  error: { padding: "0.75rem", background: "#fee2e2", borderRadius: 6, marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" },
-  success: { padding: "0.75rem", background: "#d1fae5", borderRadius: 6, marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" },
-  dismiss: { marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", textDecoration: "underline" },
-  section: { marginBottom: "2rem" },
-  muted: { color: "#6b7280", fontSize: "0.9rem" },
-  table: { width: "100%", borderCollapse: "collapse" },
-  th: { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #e5e7eb" },
-  td: { padding: "0.5rem", borderBottom: "1px solid #e5e7eb" },
-  toolbar: { display: "flex", gap: "0.5rem", marginBottom: "1rem" },
-  input: { flex: 1, padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: 6 },
-  btn: { padding: "0.5rem 1rem", background: "#2563eb", color: "white", border: "none", borderRadius: 6, cursor: "pointer" },
-  btnSecondary: { padding: "0.5rem 1rem", background: "#e5e7eb", color: "#374151", border: "none", borderRadius: 6, cursor: "pointer", marginTop: "1rem" },
-  btnSmall: { padding: "0.25rem 0.5rem", fontSize: "0.85rem", background: "#2563eb", color: "white", border: "none", borderRadius: 4, cursor: "pointer" },
-  btnDanger: { background: "#dc2626" },
-  list: { listStyle: "none", padding: 0, margin: 0 },
-  card: { padding: "1rem", border: "1px solid #e5e7eb", borderRadius: 8, marginBottom: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" },
-  desc: { margin: 0, fontSize: "0.9rem", color: "#4b5563" },
-  badge: { marginLeft: "0.5rem", fontSize: "0.75rem", background: "#d1fae5", color: "#065f46", padding: "0.15rem 0.5rem", borderRadius: 4 },
-  pagination: { display: "flex", alignItems: "center", gap: "1rem", marginTop: "1rem" },
-  pageInfo: { fontSize: "0.9rem", color: "#6b7280" },
-};

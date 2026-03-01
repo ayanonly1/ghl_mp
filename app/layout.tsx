@@ -1,3 +1,6 @@
+import "./globals.css";
+import { AppHeader } from "./components/AppHeader";
+
 export const metadata = {
   title: "MCP Registry",
   description: "Browse and attach MCP servers to Voice AI agents",
@@ -10,7 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppHeader />
+        {children}
+      </body>
     </html>
   );
 }
