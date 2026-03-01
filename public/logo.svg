@@ -1,12 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" fill="none">
   <defs>
-    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f1f33"/>
+    </linearGradient>
+    <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#3b82f6"/>
       <stop offset="100%" stop-color="#60a5fa"/>
     </linearGradient>
+    <linearGradient id="searchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#logoGrad)"/>
-  <path d="M18 22h6v2h-6v-2zm0 6h10v2H18v-2zm0 6h8v2h-8v-2z" fill="rgba(255,255,255,0.9)"/>
-  <circle cx="42" cy="28" r="8" stroke="rgba(255,255,255,0.9)" stroke-width="2.5" fill="none"/>
-  <path d="M46 38l4 4" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Background -->
+  <rect width="800" height="800" rx="120" fill="url(#bgGrad)"/>
+  
+  <!-- MCP Network: Central hub with connected nodes -->
+  <!-- Connection lines -->
+  <line x1="400" y1="320" x2="260" y2="220" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <line x1="400" y1="320" x2="540" y2="220" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <line x1="400" y1="320" x2="220" y2="400" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <line x1="400" y1="320" x2="580" y2="400" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <line x1="400" y1="320" x2="300" y2="480" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  <line x1="400" y1="320" x2="500" y2="480" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Central MCP hub -->
+  <circle cx="400" cy="320" r="65" fill="url(#nodeGrad)"/>
+  <text x="400" y="335" font-family="system-ui, sans-serif" font-size="42" font-weight="700" fill="white" text-anchor="middle">MCP</text>
+  
+  <!-- Outer nodes (servers) -->
+  <circle cx="260" cy="220" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  <circle cx="540" cy="220" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  <circle cx="220" cy="400" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  <circle cx="580" cy="400" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  <circle cx="300" cy="480" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  <circle cx="500" cy="480" r="40" fill="url(#nodeGrad)" opacity="0.85"/>
+  
+  <!-- Small dots inside outer nodes to indicate servers -->
+  <circle cx="260" cy="220" r="12" fill="white" opacity="0.9"/>
+  <circle cx="540" cy="220" r="12" fill="white" opacity="0.9"/>
+  <circle cx="220" cy="400" r="12" fill="white" opacity="0.9"/>
+  <circle cx="580" cy="400" r="12" fill="white" opacity="0.9"/>
+  <circle cx="300" cy="480" r="12" fill="white" opacity="0.9"/>
+  <circle cx="500" cy="480" r="12" fill="white" opacity="0.9"/>
+  
+  <!-- Search/magnifying glass at bottom right -->
+  <circle cx="560" cy="600" r="70" stroke="url(#searchGrad)" stroke-width="18" fill="none"/>
+  <line x1="610" y1="650" x2="680" y2="720" stroke="url(#searchGrad)" stroke-width="22" stroke-linecap="round"/>
+  
+  <!-- Registry text -->
+  <text x="400" y="720" font-family="system-ui, sans-serif" font-size="72" font-weight="600" fill="white" text-anchor="middle" letter-spacing="-2">Registry</text>
 </svg>
