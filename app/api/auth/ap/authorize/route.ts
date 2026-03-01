@@ -10,7 +10,7 @@ export async function GET() {
 
   if (!clientId || !redirectUri) {
     return NextResponse.json(
-      { error: "Server configuration error: missing GHL OAuth config" },
+      { error: "Server configuration error: missing OAuth config" },
       { status: 503 }
     );
   }

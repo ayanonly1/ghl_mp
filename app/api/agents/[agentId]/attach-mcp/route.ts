@@ -47,7 +47,7 @@ export async function POST(
     if (err instanceof GhlApiError) {
       const status = err.status === 404 ? 404 : err.status === 401 || err.status === 403 ? err.status : 502;
       return NextResponse.json(
-        { error: err.message || "HighLevel API error" },
+        { error: err.message || "API error" },
         { status }
       );
     }
