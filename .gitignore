@@ -35,3 +35,6 @@ Thumbs.db
 coverage
 .jest-cache
 .github/instructions/wmt-copilot.instructions.md
+
+# Other
+.env.local
