@@ -110,6 +110,18 @@ export interface VoiceAIAgent {
   [key: string]: unknown;
 }
 
+function normalizeAgentName(agent: Record<string, unknown>): string | undefined {
+  // GHL API may return the agent name under different field names
+  const candidate =
+    agent.name ??
+    agent.agentName ??
+    agent.agent_name ??
+    agent.title ??
+    agent.displayName ??
+    agent.display_name;
+  return typeof candidate === "string" && candidate.trim() ? candidate.trim() : undefined;
+}
+
 export async function listAgents(locationToken: string, locationId: string): Promise<VoiceAIAgent[]> {
   const res = await fetch(`${GHL_API_BASE}/voice-ai/agents?locationId=${encodeURIComponent(locationId)}`, {
     headers: {
@@ -127,7 +139,11 @@ export async function listAgents(locationToken: string, locationId: string): Pro
 
   const data = await res.json();
   const agents = data.agents ?? data;
-  return Array.isArray(agents) ? agents : [];
+  if (!Array.isArray(agents)) return [];
+  return agents.map((a: Record<string, unknown>) => ({
+    ...a,
+    name: normalizeAgentName(a),
+  }));
 }
 
 export async function getAgent(
@@ -152,7 +168,8 @@ export async function getAgent(
     throw new GhlApiError(res.status, text || res.statusText);
   }
 
-  return res.json();
+  const agent = await res.json() as Record<string, unknown>;
+  return { ...agent, name: normalizeAgentName(agent) } as VoiceAIAgent;
 }
 
 export async function patchAgent(
