@@ -185,12 +185,12 @@ function CustomPageContent() {
         <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
           OAuth failed: {urlMessage ? decodeURIComponent(urlMessage) : "Could not complete sign-in."}
           {" "}
-          <a href="/api/auth/ap/authorize">Try again</a>.
+          <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Try again</a>.
         </div>
       )}
       {showConnect && (
         <div className="alert alert-warning">
-          <a href="/api/auth/ap/authorize">Connect your account</a> to use this app.
+          <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Connect your account</a> to use this app. Complete the sign-in in this window (do not open in a new tab) so the session works in the iframe.
           <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", opacity: 0.9 }}>
             Not working? Open <a href="/api/debug/session" target="_blank" rel="noopener noreferrer">/api/debug/session</a> in the same browser to see what the server sees (cookie + session).
           </p>

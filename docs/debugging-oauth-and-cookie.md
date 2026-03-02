@@ -93,18 +93,25 @@ Do this in the **same tab** (and same window) as the Custom Page. If you open `/
 
 When the app is embedded in GHL (iframe from another domain):
 
-1. In the Network tab, confirm the **callback** request (`/api/auth/ap/callback?code=...`) is there and check for **Set-Cookie** on that response (step 2).
+1. In the Network tab, confirm the **callback** request (`/api/auth/ap/callback?code=...`) is there and check for **Set-Cookie** on that response (step 2). The cookie must include **`Partitioned`** (CHIPS) so the browser stores it in the iframe’s partition.
 2. In the Application tab, select the **top-level** frame or the iframe’s origin and check cookies for **`ap-mp.vercel.app`** (step 5). Some browsers group cookies by top-level site when the page is in an iframe.
 3. Call **`/api/debug/session`** in the **same** iframe context (e.g. open it in the same iframe or the same tab that’s showing the app). If you open the debug URL in a new tab (top-level), that tab might be first‑party and have different cookies than the iframe.
 
 That will tell you whether the cookie is set but not sent in the iframe (e.g. third‑party cookie rules) vs never set at all.
+
+### Cookie partition (CHIPS) and “cookies in another partition”
+
+Browsers partition third‑party cookies by **(top-level site, your domain)**. For the session to work in the GHL iframe:
+
+- **Complete OAuth in the same iframe.** Click “Connect your account” and finish the GHL sign‑in **without** opening the link in a new tab and without the redirect opening in the top-level window. If the callback runs in a different context (e.g. top-level tab), the cookie is stored in the wrong partition and will not be sent when the app loads in the iframe.
+- The callback sets the cookie with **`SameSite=None; Secure; Partitioned`** so it is sent in the cross-site iframe. If you see “This site has cookies in another partition that were not sent”, the cookie was likely set in a first‑party context (e.g. after opening the app in a new tab). Connect again from inside the GHL iframe and do not leave the iframe during the flow.
 
 ---
 
 ## Quick checklist
 
 - [ ] Network: request to `/api/auth/ap/callback?code=...` appears after OAuth.
-- [ ] Callback response: status 302 and **Set-Cookie: ghl_session=...** in response headers.
+- [ ] Callback response: status 302 and **Set-Cookie: ghl_session=...** (with **Partitioned** when in iframe).
 - [ ] Final URL: `.../custom-page` (no `?error=`) or `?error=auth_failed&message=...`.
 - [ ] Application: cookie `ghl_session` exists for `ap-mp.vercel.app`.
 - [ ] `/api/debug/session` opened in the **same** tab/window/iframe: `cookiePresent` and `sessionValid` as expected.

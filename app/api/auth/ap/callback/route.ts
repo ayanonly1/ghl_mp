@@ -70,16 +70,30 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.redirect(new URL(CUSTOM_PAGE_PATH, baseUrl));
     const isProduction = process.env.NODE_ENV === "production";
-    response.cookies.set("ghl_session", sessionCookie, {
-      httpOnly: true,
-      secure: isProduction,
-      // SameSite=none so the cookie is sent when the app is embedded in GHL's iframe (cross-site)
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: getSessionCookieMaxAge(),
-      path: "/",
-      // CHIPS: partitioned cookie so Chrome sends it in third-party iframe context (e.g. GHL embedding)
-      partitioned: true,
-    });
+    const maxAge = getSessionCookieMaxAge();
+
+    if (isProduction) {
+      // Set cookie via raw header so Partitioned is guaranteed (CHIPS).
+      // Browsers only send the cookie in the iframe when it's partitioned by top-level site.
+      const parts = [
+        `ghl_session=${sessionCookie}`,
+        "Path=/",
+        "HttpOnly",
+        "Secure",
+        "SameSite=None",
+        `Max-Age=${maxAge}`,
+        "Partitioned",
+      ];
+      response.headers.set("Set-Cookie", parts.join("; "));
+    } else {
+      response.cookies.set("ghl_session", sessionCookie, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge,
+        path: "/",
+      });
+    }
     return response;
   } catch (err) {
     if (err instanceof GhlApiError) {
