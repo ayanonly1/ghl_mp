@@ -168,7 +168,7 @@ export async function patchAgent(
 ): Promise<VoiceAIAgent> {
   // GHL Voice AI PATCH expects mcp_servers (snake_case); sending mcpServers returns 422 "should not exist"
   const body: PatchAgentBody = {};
-  if (patch.mcpServers) {
+  if ("mcpServers" in patch && patch.mcpServers) {
     body.mcp_servers = patch.mcpServers;
   }
   if ("mcp_servers" in patch && patch.mcp_servers) {
