@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-const SESSION_STORAGE_KEY = "ghl_session_token";
-export { SESSION_STORAGE_KEY };
-
 export default function AuthConnectorPage() {
   const [status, setStatus] = useState<"loading" | "done" | "error">("loading");
   const [message, setMessage] = useState("Connecting session…");
