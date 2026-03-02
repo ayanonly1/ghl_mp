@@ -34,9 +34,22 @@ type Attachment = {
 };
 
 const API = "/api";
+const SESSION_STORAGE_KEY = "ghl_session_token";
+
+function getSessionToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem(SESSION_STORAGE_KEY);
+}
+
+function apiHeaders(): HeadersInit {
+  const token = getSessionToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["X-GHL-Session"] = token;
+  return headers;
+}
 
 async function apiGet<T>(path: string): Promise<T> {
-  const res = await fetch(path, { credentials: "include" });
+  const res = await fetch(path, { credentials: "include", headers: apiHeaders() });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data?.error ?? `Request failed: ${res.status}`);
@@ -48,7 +61,7 @@ async function apiPost(path: string, body: unknown): Promise<unknown> {
   const res = await fetch(path, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...apiHeaders() },
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
@@ -71,6 +84,20 @@ function CustomPageContent() {
   const [attachSuccess, setAttachSuccess] = useState<string | null>(null);
   const [attachLoading, setAttachLoading] = useState<string | null>(null);
   const [changeAgentId, setChangeAgentId] = useState<string | null>(null);
+  const [sessionTokenReady, setSessionTokenReady] = useState(() => (typeof window !== "undefined" ? !!sessionStorage.getItem(SESSION_STORAGE_KEY) : false));
+
+  const inIframe = typeof window !== "undefined" && window.self !== window.top;
+
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "ghl_session_token" && typeof event.data.token === "string") {
+        sessionStorage.setItem(SESSION_STORAGE_KEY, event.data.token);
+        setSessionTokenReady(true);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
 
   const loadAttachments = useCallback(async () => {
     setLoadingAttachments(true);
@@ -109,6 +136,10 @@ function CustomPageContent() {
   }, [loadAttachments]);
 
   useEffect(() => {
+    if (sessionTokenReady) loadAttachments();
+  }, [sessionTokenReady, loadAttachments]);
+
+  useEffect(() => {
     loadMcps();
   }, [loadMcps]);
 
@@ -123,7 +154,7 @@ function CustomPageContent() {
     setStep("choose-agent");
     setAgents([]);
     setLoadingAgents(true);
-    fetch(`${API}/agents`, { credentials: "include" })
+    fetch(`${API}/agents`, { credentials: "include", headers: apiHeaders() })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("Unauthorized"))))
       .then((data: { agents?: Agent[] }) => {
         setAgents(data.agents ?? []);
@@ -185,12 +216,34 @@ function CustomPageContent() {
         <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
           OAuth failed: {urlMessage ? decodeURIComponent(urlMessage) : "Could not complete sign-in."}
           {" "}
-          <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Try again</a>.
+          {inIframe ? (
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => window.open("/api/auth/ap/authorize?mode=popup", "ghl_oauth", "width=500,height=600")}>
+              Try again
+            </button>
+          ) : (
+            <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Try again</a>
+          )}.
         </div>
       )}
       {showConnect && (
         <div className="alert alert-warning">
-          <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Connect your account</a> to use this app. Complete the sign-in in this window (do not open in a new tab) so the session works in the iframe.
+          {inIframe ? (
+            <>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => window.open("/api/auth/ap/authorize?mode=popup", "ghl_oauth", "width=500,height=600")}
+              >
+                Connect your account
+              </button>
+              {" "}
+              Opens in a popup — complete sign-in there, then this page will work in the iframe.
+            </>
+          ) : (
+            <>
+              <a href="/api/auth/ap/authorize" target="_self" rel="noopener">Connect your account</a> to use this app. Complete the sign-in in this window (do not open in a new tab) so the session works in the iframe.
+            </>
+          )}
           <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", opacity: 0.9 }}>
             Not working? Open <a href="/api/debug/session" target="_blank" rel="noopener noreferrer">/api/debug/session</a> in the same browser to see what the server sees (cookie + session).
           </p>

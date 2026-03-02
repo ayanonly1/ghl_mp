@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { decodeSessionCookie, getSession } from "@/lib/session";
 
 export interface AuthContext {
@@ -9,7 +9,14 @@ export interface AuthContext {
 
 export async function getAuthContext(): Promise<AuthContext | null> {
   const cookieStore = await cookies();
-  const cookieValue = cookieStore.get("ghl_session")?.value;
+  let cookieValue = cookieStore.get("ghl_session")?.value;
+
+  // Iframe fallback: accept session token from header (set by client when cookie is not sent in iframe)
+  if (!cookieValue) {
+    const headersList = await headers();
+    const sessionHeader = headersList.get("x-ghl-session");
+    if (sessionHeader) cookieValue = sessionHeader;
+  }
 
   // Prefer signed cookie (works on Vercel serverless; no in-memory store needed)
   const cookieSession = decodeSessionCookie(cookieValue);

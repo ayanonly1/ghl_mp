@@ -11,6 +11,7 @@ import {
 } from "@/lib/session";
 
 const CUSTOM_PAGE_PATH = "/custom-page";
+const CONNECTOR_PATH = "/auth/connector";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -35,6 +36,9 @@ export async function GET(request: NextRequest) {
       new URL(`${CUSTOM_PAGE_PATH}?error=missing_code`, baseUrl)
     );
   }
+
+  const cookieStore = request.cookies;
+  const useConnector = cookieStore.get("oauth_flow")?.value === "popup";
 
   try {
     let tokenResponse = await exchangeCodeForTokens(code, fullRedirectUri, "Location");
@@ -68,13 +72,14 @@ export async function GET(request: NextRequest) {
       refreshToken: tokenResponse.refresh_token,
     });
 
-    const response = NextResponse.redirect(new URL(CUSTOM_PAGE_PATH, baseUrl));
+    const response = NextResponse.redirect(
+      new URL(useConnector ? CONNECTOR_PATH : CUSTOM_PAGE_PATH, baseUrl)
+    );
     const isProduction = process.env.NODE_ENV === "production";
     const maxAge = getSessionCookieMaxAge();
 
     if (isProduction) {
       // Set cookie via raw header so Partitioned is guaranteed (CHIPS).
-      // Browsers only send the cookie in the iframe when it's partitioned by top-level site.
       const parts = [
         `ghl_session=${sessionCookie}`,
         "Path=/",
@@ -93,6 +98,9 @@ export async function GET(request: NextRequest) {
         maxAge,
         path: "/",
       });
+    }
+    if (useConnector) {
+      response.cookies.delete("oauth_flow");
     }
     return response;
   } catch (err) {
