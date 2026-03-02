@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 type McpServer = {
   qualifiedName: string;
@@ -55,7 +56,7 @@ async function apiPost(path: string, body: unknown): Promise<unknown> {
   return data;
 }
 
-export default function CustomPage() {
+function CustomPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [mcps, setMcps] = useState<McpListResponse | null>(null);
@@ -173,13 +174,26 @@ export default function CustomPage() {
     }
   };
 
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+  const urlMessage = searchParams.get("message");
   const showConnect = attachments.length === 0 && !loadingAttachments && error?.toLowerCase().includes("unauthorized");
 
   return (
     <main className="page-container">
+      {urlError === "auth_failed" && (
+        <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
+          OAuth failed: {urlMessage ? decodeURIComponent(urlMessage) : "Could not complete sign-in."}
+          {" "}
+          <a href="/api/auth/ap/authorize">Try again</a>.
+        </div>
+      )}
       {showConnect && (
         <div className="alert alert-warning">
           <a href="/api/auth/ap/authorize">Connect your account</a> to use this app.
+          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem", opacity: 0.9 }}>
+            Not working? Open <a href="/api/debug/session" target="_blank" rel="noopener noreferrer">/api/debug/session</a> in the same browser to see what the server sees (cookie + session).
+          </p>
         </div>
       )}
 
@@ -369,5 +383,13 @@ export default function CustomPage() {
         </>
       )}
     </main>
+  );
+}
+
+export default function CustomPage() {
+  return (
+    <Suspense fallback={<div className="page-container">Loading…</div>}>
+      <CustomPageContent />
+    </Suspense>
   );
 }
