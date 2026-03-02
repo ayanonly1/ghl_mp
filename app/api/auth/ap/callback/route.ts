@@ -77,6 +77,8 @@ export async function GET(request: NextRequest) {
       sameSite: isProduction ? "none" : "lax",
       maxAge: getSessionCookieMaxAge(),
       path: "/",
+      // CHIPS: partitioned cookie so Chrome sends it in third-party iframe context (e.g. GHL embedding)
+      partitioned: true,
     });
     return response;
   } catch (err) {
