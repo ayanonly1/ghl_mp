@@ -96,7 +96,7 @@ If you want to react to install/uninstall events:
 
 | Setting         | Value                                                                        |
 | --------------- | ---------------------------------------------------------------------------- |
-| **Webhook URL** | `https://<your-vercel-domain>/api/webhooks/ghl` (only if you add this route) |
+| **Webhook URL** | `https://<your-vercel-domain>/api/webhooks/ap` (only if you add this route) |
 | **Events**      | Subscribe to **App Install** (and optionally **App Uninstall**)              |
 
 
