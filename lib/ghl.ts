@@ -4,6 +4,8 @@
  */
 
 const GHL_API_BASE = "https://services.leadconnectorhq.com";
+/** GHL API version header — required for all Lead Connector API requests. */
+const GHL_VERSION = "2021-07-28";
 
 function getEnv() {
   const clientId = process.env.GHL_CLIENT_ID;
@@ -39,7 +41,11 @@ export async function exchangeCodeForTokens(
   });
   const res = await fetch(`${GHL_API_BASE}/oauth/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      Version: GHL_VERSION,
+    },
     body: body.toString(),
     signal: AbortSignal.timeout(10000),
   });
@@ -54,7 +60,7 @@ export async function exchangeCodeForTokens(
 
 export async function getInstalledLocations(companyToken: string): Promise<{ locationId: string }[]> {
   const res = await fetch(`${GHL_API_BASE}/oauth/installedLocations`, {
-    headers: { Authorization: `Bearer ${companyToken}`, Version: "2021-07-28" },
+    headers: { Authorization: `Bearer ${companyToken}`, Version: GHL_VERSION },
     signal: AbortSignal.timeout(10000),
   });
 
@@ -82,7 +88,7 @@ export async function getLocationToken(
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       Accept: "application/json",
-      Version: "2021-07-28",
+      Version: GHL_VERSION,
       Authorization: `Bearer ${companyToken}`,
     },
     body: body.toString(),
@@ -109,6 +115,7 @@ export async function listAgents(locationToken: string, locationId: string): Pro
     headers: {
       Authorization: `Bearer ${locationToken}`,
       "Content-Type": "application/json",
+      Version: GHL_VERSION,
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -134,6 +141,7 @@ export async function getAgent(
       headers: {
         Authorization: `Bearer ${locationToken}`,
         "Content-Type": "application/json",
+        Version: GHL_VERSION,
       },
       signal: AbortSignal.timeout(10000),
     }
@@ -160,6 +168,7 @@ export async function patchAgent(
       headers: {
         Authorization: `Bearer ${locationToken}`,
         "Content-Type": "application/json",
+        Version: GHL_VERSION,
       },
       body: JSON.stringify(patch),
       signal: AbortSignal.timeout(10000),
