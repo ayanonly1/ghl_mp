@@ -19,13 +19,10 @@ export async function POST(
   try {
     const existing = await getAgent(auth.accessToken, auth.locationId, agentId);
     const raw = existing as Record<string, unknown>;
-    const current = (raw.mcpServers ?? raw.mcp_servers) as Record<string, { url: string; headers?: Record<string, string> }> | undefined;
-    const mcpServers: Record<string, { url: string; headers?: Record<string, string> }> =
-      typeof current === "object" && current ? { ...current } : {};
-    const keys = Object.keys(mcpServers);
-    for (const k of keys) delete mcpServers[k];
-
-    await patchAgent(auth.accessToken, auth.locationId, agentId, { mcpServers });
+    // Send full agent body with mcpServers cleared; GHL PATCH rejects partial body with only mcpServers/mcp_servers
+    const { mcpServers: _m, mcp_servers: _s, ...rest } = raw;
+    const body = { ...rest, mcpServers: {} };
+    await patchAgent(auth.accessToken, auth.locationId, agentId, body);
     return NextResponse.json({
       success: true,
       agentId,

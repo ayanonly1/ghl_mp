@@ -124,19 +124,18 @@ describe("listAgents", () => {
 });
 
 describe("patchAgent", () => {
-  it("sends PATCH with mcp_servers (snake_case for GHL API)", async () => {
+  it("sends PATCH with given body (full agent or mcpServers)", async () => {
     globalThis.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ id: "a1", mcp_servers: { mcp1: { url: "https://x.com" } } }),
+      json: () => Promise.resolve({ id: "a1", mcpServers: { mcp1: { url: "https://x.com" } } }),
     });
-    await patchAgent("token", "loc1", "a1", {
-      mcpServers: { mcp1: { url: "https://x.com" } },
-    });
+    const body = { name: "Agent", mcpServers: { mcp1: { url: "https://x.com" } } };
+    await patchAgent("token", "loc1", "a1", body);
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining("/voice-ai/agents/a1"),
       expect.objectContaining({
         method: "PATCH",
-        body: JSON.stringify({ mcp_servers: { mcp1: { url: "https://x.com" } } }),
+        body: JSON.stringify(body),
       })
     );
   });

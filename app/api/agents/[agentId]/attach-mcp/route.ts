@@ -37,7 +37,10 @@ export async function POST(
     const mcpServers = typeof current === "object" && current ? { ...current } : {};
     mcpServers[key] = { url, ...(headers && typeof headers === "object" ? { headers } : {}) };
 
-    await patchAgent(auth.accessToken, auth.locationId, agentId, { mcpServers });
+    // Send full agent body; GHL PATCH rejects partial body with only mcpServers/mcp_servers
+    const { mcp_servers: _skip, ...rest } = raw;
+    const body = { ...rest, mcpServers };
+    await patchAgent(auth.accessToken, auth.locationId, agentId, body);
     return NextResponse.json({
       success: true,
       agentId,

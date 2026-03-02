@@ -155,25 +155,13 @@ export async function getAgent(
   return res.json();
 }
 
-/** Shape we send in PATCH body (GHL API may expect snake_case). */
-export type PatchAgentBody = {
-  mcp_servers?: Record<string, { url: string; headers?: Record<string, string> }>;
-};
-
 export async function patchAgent(
   locationToken: string,
   locationId: string,
   agentId: string,
-  patch: { mcpServers?: Record<string, { url: string; headers?: Record<string, string> }> } | PatchAgentBody
+  /** Full agent body (e.g. from GET with mcpServers updated). GHL PATCH rejects both mcpServers and mcp_servers when sent alone; sending full agent may be required. */
+  patch: Record<string, unknown>
 ): Promise<VoiceAIAgent> {
-  // GHL Voice AI PATCH expects mcp_servers (snake_case); sending mcpServers returns 422 "should not exist"
-  const body: PatchAgentBody = {};
-  if ("mcpServers" in patch && patch.mcpServers) {
-    body.mcp_servers = patch.mcpServers;
-  }
-  if ("mcp_servers" in patch && patch.mcp_servers) {
-    body.mcp_servers = patch.mcp_servers;
-  }
   const res = await fetch(
     `${GHL_API_BASE}/voice-ai/agents/${encodeURIComponent(agentId)}?locationId=${encodeURIComponent(locationId)}`,
     {
@@ -183,7 +171,7 @@ export async function patchAgent(
         "Content-Type": "application/json",
         Version: GHL_VERSION,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(patch),
       signal: AbortSignal.timeout(10000),
     }
   );
