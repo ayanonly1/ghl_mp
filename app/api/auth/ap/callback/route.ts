@@ -5,14 +5,16 @@ import {
   getLocationToken,
   GhlApiError,
 } from "@/lib/ghl";
-import { getSession, setSession } from "@/lib/session";
+import {
+  encodeSessionCookie,
+  getSessionCookieMaxAge,
+} from "@/lib/session";
 
 const CUSTOM_PAGE_PATH = "/custom-page";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get("code");
-  const state = searchParams.get("state");
 
   const redirectUri = process.env.GHL_OAUTH_REDIRECT_URI;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin;
@@ -59,19 +61,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const sessionId = state ?? `sess_${Date.now()}`;
-    setSession(sessionId, {
+    // Use signed cookie so session works on Vercel (no in-memory store across instances)
+    const sessionCookie = encodeSessionCookie({
       locationId,
       accessToken: tokenResponse.access_token,
       refreshToken: tokenResponse.refresh_token,
     });
 
     const response = NextResponse.redirect(new URL(CUSTOM_PAGE_PATH, baseUrl));
-    response.cookies.set("ghl_session", sessionId, {
+    response.cookies.set("ghl_session", sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24,
+      maxAge: getSessionCookieMaxAge(),
       path: "/",
     });
     return response;

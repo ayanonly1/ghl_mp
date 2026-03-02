@@ -56,6 +56,7 @@ cp .env.example .env
 | `GHL_OAUTH_REDIRECT_URI` | OAuth callback URL (e.g. `https://your-app.vercel.app/api/auth/ap/callback`). |
 | `GHL_SCOPES` | Optional; e.g. `locations.readonly`. |
 | `NEXT_PUBLIC_APP_URL` | Public app URL (e.g. `https://your-app.vercel.app`) for redirects. |
+| `SESSION_SECRET` | Optional. Secret for signing the session cookie (defaults to `GHL_CLIENT_SECRET`). Set a dedicated secret in production if you prefer. |
 
 ### Run locally
 

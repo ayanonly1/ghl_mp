@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSession } from "@/lib/session";
+import { decodeSessionCookie, getSession } from "@/lib/session";
 
 export interface AuthContext {
   sessionId: string;
@@ -9,14 +9,25 @@ export interface AuthContext {
 
 export async function getAuthContext(): Promise<AuthContext | null> {
   const cookieStore = await cookies();
-  const sessionId = cookieStore.get("ghl_session")?.value;
-  if (!sessionId) return null;
+  const cookieValue = cookieStore.get("ghl_session")?.value;
 
-  const session = getSession(sessionId);
+  // Prefer signed cookie (works on Vercel serverless; no in-memory store needed)
+  const cookieSession = decodeSessionCookie(cookieValue);
+  if (cookieSession) {
+    return {
+      sessionId: "cookie",
+      locationId: cookieSession.locationId,
+      accessToken: cookieSession.accessToken,
+    };
+  }
+
+  // Fallback: in-memory session by id (local dev only)
+  if (!cookieValue) return null;
+  const session = getSession(cookieValue);
   if (!session) return null;
 
   return {
-    sessionId,
+    sessionId: cookieValue,
     locationId: session.locationId,
     accessToken: session.accessToken,
   };
