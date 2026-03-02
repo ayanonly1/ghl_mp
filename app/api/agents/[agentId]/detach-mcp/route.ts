@@ -19,9 +19,11 @@ export async function POST(
   try {
     const existing = await getAgent(auth.accessToken, auth.locationId, agentId);
     const raw = existing as Record<string, unknown>;
-    // Send full agent body with mcpServers cleared; GHL PATCH rejects partial body with only mcpServers/mcp_servers
-    const { mcpServers: _m, mcp_servers: _s, ...rest } = raw;
-    const body = { ...rest, mcpServers: {} };
+    // GHL PATCH rejects id, locationId, actions, traceId, mcpServers. Strip those and clear MCP via integrations.
+    const forbidden = ["id", "locationId", "actions", "traceId", "mcpServers", "mcp_servers"];
+    const allowed = { ...raw };
+    for (const k of forbidden) delete allowed[k];
+    const body = { ...allowed, integrations: { mcpServers: {} } };
     await patchAgent(auth.accessToken, auth.locationId, agentId, body);
     return NextResponse.json({
       success: true,
