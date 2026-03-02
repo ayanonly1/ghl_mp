@@ -18,7 +18,8 @@ export async function POST(
 
   try {
     const existing = await getAgent(auth.accessToken, auth.locationId, agentId);
-    const current = (existing as Record<string, unknown>).mcpServers as Record<string, { url: string; headers?: Record<string, string> }> | undefined;
+    const raw = existing as Record<string, unknown>;
+    const current = (raw.mcpServers ?? raw.mcp_servers) as Record<string, { url: string; headers?: Record<string, string> }> | undefined;
     const mcpServers: Record<string, { url: string; headers?: Record<string, string> }> =
       typeof current === "object" && current ? { ...current } : {};
     const keys = Object.keys(mcpServers);

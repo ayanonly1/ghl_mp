@@ -10,7 +10,8 @@ export interface AgentAttachment {
 }
 
 function getMcpFromAgent(agent: Record<string, unknown>): { key: string; name?: string } | null {
-  const mcpServers = agent.mcpServers as Record<string, { url?: string; [k: string]: unknown }> | undefined;
+  // API may return mcpServers (camelCase) or mcp_servers (snake_case)
+  const mcpServers = (agent.mcpServers ?? agent.mcp_servers) as Record<string, { url?: string; [k: string]: unknown }> | undefined;
   if (!mcpServers || typeof mcpServers !== "object") return null;
   const keys = Object.keys(mcpServers);
   if (keys.length === 0) return null;
