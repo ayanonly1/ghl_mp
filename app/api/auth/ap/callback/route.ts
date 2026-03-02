@@ -69,10 +69,12 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(new URL(CUSTOM_PAGE_PATH, baseUrl));
+    const isProduction = process.env.NODE_ENV === "production";
     response.cookies.set("ghl_session", sessionCookie, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction,
+      // SameSite=none so the cookie is sent when the app is embedded in GHL's iframe (cross-site)
+      sameSite: isProduction ? "none" : "lax",
       maxAge: getSessionCookieMaxAge(),
       path: "/",
     });
