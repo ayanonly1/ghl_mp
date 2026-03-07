@@ -143,7 +143,7 @@ export async function listAgents(locationToken: string, locationId: string): Pro
   return agents.map((a: Record<string, unknown>) => ({
     ...a,
     name: normalizeAgentName(a),
-  }));
+  })) as VoiceAIAgent[];
 }
 
 export async function getAgent(
