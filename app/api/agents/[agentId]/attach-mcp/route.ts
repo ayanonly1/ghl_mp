@@ -37,12 +37,12 @@ export async function POST(
     const mcpServers = typeof current === "object" && current ? { ...current } : {};
     mcpServers[key] = { url, ...(headers && typeof headers === "object" ? { headers } : {}) };
 
-    // GHL PATCH rejects: id, locationId, actions, traceId, mcpServers. Strip those and try "integrations" for MCP.
-    const forbidden = ["id", "locationId", "actions", "traceId", "mcpServers", "mcp_servers", "traceId"];
+    // GHL docs use top-level mcpServers for agent config. Strip read-only fields; send our merged mcpServers at top level.
+    const forbidden = ["id", "locationId", "actions", "traceId", "mcpServers", "mcp_servers"];
     const allowed = { ...raw };
     for (const k of forbidden) delete allowed[k];
-    const body = { ...allowed, integrations: { mcpServers } };
-    await patchAgent(auth.accessToken, auth.locationId, agentId, body);
+    const patchBody = { ...allowed, mcpServers };
+    await patchAgent(auth.accessToken, auth.locationId, agentId, patchBody);
     return NextResponse.json({
       success: true,
       agentId,
@@ -56,10 +56,9 @@ export async function POST(
         err.status === 422
           ? "Voice AI PATCH rejected the request. The GoHighLevel API may not support updating MCP via this endpoint—try configuring MCP in the Voice AI agent settings in your GHL dashboard."
           : err.message;
-      return NextResponse.json(
-        { error: message },
-        { status }
-      );
+      const json: { error: string; details?: string } = { error: message };
+      if (err.status === 422 && err.message) json.details = err.message;
+      return NextResponse.json(json, { status });
     }
     return NextResponse.json(
       { error: "Failed to attach MCP" },

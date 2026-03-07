@@ -69,13 +69,30 @@ export async function GET(request: NextRequest) {
     });
 
     const response = NextResponse.redirect(new URL(CUSTOM_PAGE_PATH, baseUrl));
-    response.cookies.set("ghl_session", sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: getSessionCookieMaxAge(),
-      path: "/",
-    });
+    const isProduction = process.env.NODE_ENV === "production";
+    const maxAge = getSessionCookieMaxAge();
+
+    if (isProduction) {
+      // Iframe-safe: SameSite=None; Secure; Partitioned (CHIPS) so cookie works in GHL iframe
+      const parts = [
+        `ghl_session=${sessionCookie}`,
+        "Path=/",
+        "HttpOnly",
+        "Secure",
+        "SameSite=None",
+        `Max-Age=${maxAge}`,
+        "Partitioned",
+      ];
+      response.headers.set("Set-Cookie", parts.join("; "));
+    } else {
+      response.cookies.set("ghl_session", sessionCookie, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge,
+        path: "/",
+      });
+    }
     return response;
   } catch (err) {
     if (err instanceof GhlApiError) {
